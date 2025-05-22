@@ -1,0 +1,69 @@
+---
+title: "Data Science Analysis"
+output: word_document
+date: "2023-09-05"
+---
+
+```{r setup, include = TRUE}
+library(readr)
+shamiri_imputed_dataset <- read_csv("C:/Users/USER/Downloads/shamiri_imputed_dataset.csv")
+View(shamiri_imputed_dataset)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data Pre-processing
+```{r data cleaning, echo=TRUE}
+library(dplyr)
+shamiri_imputed_dataset %>% select(c(-1,-2,-3,-4,-5,-6,-7,-8,-9,-11,-12,-13,-14,-15,-16,-17,-19,-20,-21,-22,-23,-24,-25,-26,-27,-28,-29,-30))->shamiri_dataset
+shamiri_dataset$Gender<-factor(shamiri_dataset$Gender,labels = c("Female","Male"))
+View(shamiri_dataset)
+```
+
+## Data Visualization
+```{r visualization,echo=TRUE}
+library(ggplot2)
+attach(shamiri_dataset)
+ggplot(data = shamiri_dataset, aes(x=Av_PHQ))+geom_histogram(bins=4, fill="lightblue", col="blue")
+ggplot(data = shamiri_dataset, aes(x=Av_GAD))+geom_histogram(bins = 4, fill="lightgreen", col="green")
+ggplot(data = shamiri_dataset, aes(y=Av_PHQ, x=Gender, fill=Gender))+geom_boxplot()
+ggplot(data = shamiri_dataset, aes(y=Av_PHQ, X=School_Resources, fill=School_Resources))+geom_boxplot()
+ggplot(data = shamiri_dataset, aes(y=Av_GAD, x=Gender, fill=Gender))+geom_boxplot()
+ggplot(data = shamiri_dataset, aes(y=Av_MSSS, x=Gender, fill=Gender))+geom_boxplot()
+ggplot(data = shamiri_dataset, aes(y=Av_PHQ, x=Age))+geom_point(col="tomato")+geom_smooth(method = "lm", se=F)
+ggplot(data = shamiri_dataset, aes(x=Age, y=Av_GAD))+geom_point(col="purple")+geom_smooth(method = "lm", se=F)
+ggplot(data = shamiri_dataset, aes(x=Av_MSSS, y=Av_PHQ))+geom_point(col="black")+geom_smooth(method = "lm", se=F)
+```
+
+## Splitting Data
+```{r case study,echo=TRUE}
+library(caTools)
+sample.split(shamiri_dataset$Av_PHQ, SplitRatio = 0.65)->split_index
+train<-subset(shamiri_dataset,split_index==T)
+test<-subset(shamiri_dataset,split_index==F)
+nrow(train)
+nrow(test)
+```
+
+## Model Building
+```{r model building, echo=TRUE}
+lm(Av_PHQ~.,data = train)->mod1
+predict(mod1,test)->result
+cbind(actual=test$Av_PHQ,predicted=result)->compare_result
+as.data.frame(compare_result)->compare_result
+compare_result$actual-compare_result$predicted->error
+cbind(compare_result,error)->compare_result
+sqrt(mean(compare_result$error^2))->rmse1
+print(rmse1)
+summary(mod1)
+
+lm(Av_PHQ~.-Tribe-Gender-School_Resources-Age-School,data=train)->mod2
+predict(mod2,test)->result2
+cbind.data.frame(actual=test$Av_PHQ,predicted=result2)->compare_result2
+compare_result2$actual-compare_result2$predicted->error
+cbind(compare_result2,error)->compare_result2
+sqrt(mean(compare_result2$error^2))->rmse2
+print(rmse2)
+summary(mod2)
+```
+
+
