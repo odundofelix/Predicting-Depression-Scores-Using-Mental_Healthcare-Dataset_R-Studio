@@ -1,5 +1,5 @@
 ---
-title: "Predicting-Depression-Scores-Using-Mentak-Health-Dataset_R programming"
+title: "Predicting-Depression-Scores-Using-Mental-Health-Dataset_R programming"
 output: word_document
 date: "2023-09-05"
 ---
